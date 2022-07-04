@@ -1,6 +1,7 @@
 package kr.ac.kopo.ctc.kopo44.replyAdmin.service;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -34,9 +35,9 @@ public class ReplyItemServiceImpl implements ReplyItemService {
 	@Override
 	public ReplyItem readOne(String strId) {
 		int id = Integer.parseInt(strId);
-		ReplyItem scoreItem = replyItemDao.readOne(id);
+		ReplyItem replyItem = replyItemDao.readOne(id);
 
-		return scoreItem;
+		return replyItem;
 	}
 
 	@Override
@@ -118,12 +119,9 @@ public class ReplyItemServiceImpl implements ReplyItemService {
 		
 		String date = newDate();
 
-		String title = strTitle;
-		String content = strContent;
-
-		replyItem.setTitle(title);
+		replyItem.setTitle(strTitle);
 		replyItem.setDate(date);
-		replyItem.setContent(content);
+		replyItem.setContent(strContent);
 		
 		//replyItem.setRootid(rootid);
 		replyItem.setRelevel(0);
@@ -161,11 +159,18 @@ public class ReplyItemServiceImpl implements ReplyItemService {
 	}
 
 	@Override
-	public boolean replyItemDeleteOne(String strId) {
+	public boolean replyItemDeleteOne(String strId, int rootid, int relevel, int recnt) {
 		int deter = 0;
+		//파트 삭제 결과 판단용2
+		int deter2 = 0;
 		boolean result = false;
 		int id = Integer.parseInt(strId);
 		ReplyItemDao replyItemDao = new ReplyItemDaoImpl();
+
+		int deleteLimit = findRecnt(rootid, relevel, recnt);
+		
+		deter2 = replyItemDao.deleteLowerLevels(rootid, recnt, deleteLimit);
+		
 		deter = replyItemDao.deleteOne(id);
 		
 		if(deter == 1) {
@@ -238,7 +243,6 @@ public class ReplyItemServiceImpl implements ReplyItemService {
 
 	@Override
 	public boolean createReply(String title, String content, String strRootid, String strRelevel, String strRecnt) {
-		//ㅔ
 		int deter = 0;
 		boolean result = false;
 		
@@ -255,10 +259,19 @@ public class ReplyItemServiceImpl implements ReplyItemService {
 		int relevel = Integer.parseInt(strRelevel);
 		int recnt = Integer.parseInt(strRecnt);
 		
-		replyItem.setRootid(rootid);
-		replyItem.setRelevel(relevel);
-		replyItem.setRecnt(recnt);
+		//현재 게시글의 recnt찾기
+		int myRecnt = findRecnt(rootid, relevel, recnt);
+		int myLevel = relevel + 1;
 		
+		replyItem.setRootid(rootid);
+		replyItem.setRelevel(myLevel);
+		replyItem.setRecnt(myRecnt);
+		
+		//번호 뒤로 밀기
+		replyItemDao.pushBackRecnt(rootid, myLevel, myRecnt);
+		
+		
+		//반환 값 정해주기
 		deter = replyItemDao.createReplyOne(replyItem);
 		if(deter == 1) {
 			result = true;
@@ -267,12 +280,45 @@ public class ReplyItemServiceImpl implements ReplyItemService {
 		return result;
 	}
 
-	@Override
-	public boolean createRereply(String title, String content, String id, String relevel) {
-		// TODO Auto-generated method stub
-		return false; 
-	}
 	
+	//만드는 게시글의 recnt 값 구하기
+	private int findRecnt(int rootid, int MomRelevel, int MomRecnt) {
+		int myrecnt = 0;
+		
+		ReplyItemDao replyItemDao = new ReplyItemDaoImpl();
+		
+		ArrayList<Integer[]> rootidPack = replyItemDao.findRecnt(rootid, MomRecnt);
+
+		//만약 엄마 row 말고 더 없을 경우. 그냥 더하기 해주기
+		if(rootidPack.size() == 1) {
+			Integer[] oneRow = rootidPack.get(0);
+			myrecnt = oneRow[1]+1;
+			return myrecnt;
+		}
+		
+		for(int i = 1; i < rootidPack.size(); i++) {
+			
+			//같은 rootid를 가진 row들 중, relevel과 recnt를 추출하여 만든 배열
+			Integer[] oneRow = rootidPack.get(i);
+			
+			
+			if(oneRow[0] <= MomRelevel) {
+				myrecnt = oneRow[1];
+				break;
+			}
+			
+			//배열에서 엄마 레벨과 같은 row가 없는 경우 그냥 반복문 끝나는거 방지.
+			if(i == rootidPack.size()-1) {
+				myrecnt = oneRow[1]+1;
+				return myrecnt;
+			}
+
+		}
+		
+		
+		return myrecnt;
+	}
+
 	
 
 }

@@ -15,12 +15,18 @@
 <body>
 	<%	ReplyItemService replyItemService = new ReplyItemServiceImpl();
 
-			String strId = request.getParameter("id");
-			
-			Boolean result = replyItemService.replyItemDeleteOne(strId);
-			
-			ServletContext context = getServletContext();
-			context.setAttribute("result", result);
+		String strId = request.getParameter("id");
+		
+		ReplyItem scoreItem = replyItemService.readOne(strId);
+		
+		int relevel = scoreItem.getRelevel();
+		int rootid = scoreItem.getRootid();
+		int recnt = scoreItem.getRecnt();
+		
+		Boolean result = replyItemService.replyItemDeleteOne(strId, rootid, relevel, recnt);
+		
+		ServletContext context = getServletContext();
+		context.setAttribute("result", result);
 	%>
 	<script>
 	if(${result}){

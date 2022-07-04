@@ -111,7 +111,8 @@ public class ReplyItemDaoImpl implements ReplyItemDao {
 	@Override
 	public List<ReplyItem> readAll(int startIndex, int countPerPage) {
 		List<ReplyItem> results = new ArrayList<>();
-		String sql = "SELECT * FROM " + TABLE_NAME + " ORDER BY " + COLUMN_ROOTID + " DESC, " + COLUMN_RECNT +" LIMIT ?, ?";
+		String sql = "SELECT * FROM " + TABLE_NAME + " ORDER BY " + COLUMN_ROOTID + " DESC, " + COLUMN_RECNT
+				+ " LIMIT ?, ?";
 		// TRY RESOURCE CATCH문
 		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:33063/koposw44", "root", "koposw44");
 				PreparedStatement pstmt = conn.prepareStatement(sql);) {
@@ -256,26 +257,26 @@ public class ReplyItemDaoImpl implements ReplyItemDao {
 	}
 
 	@Override
-	public int createReplyOne(ReplyItem ReplyItem) {
+	public int createReplyOne(ReplyItem replyItem) {
 		String sql = "INSERT INTO " + TABLE_NAME
 				+ "(title, date, content, rootid, relevel, recnt, viewcnt) VALUES (?, ?, ?, ?, ?, ?, ?)";
 		int result;
 
 		// 댓글 제목에 -> 붙이기
-		String retitle = addReplyMark(ReplyItem.getRelevel()) + ReplyItem.getTitle();
+		String retitle = addReplyMark(replyItem.getRelevel()) + replyItem.getTitle();
 
 		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:33063/koposw44", "root", "koposw44");
 				PreparedStatement pstmt = conn.prepareStatement(sql);) {
 
 			pstmt.setString(1, retitle);
-			pstmt.setString(2, ReplyItem.getDate());
-			pstmt.setString(3, ReplyItem.getContent());
-			pstmt.setInt(4, ReplyItem.getRootid());
-			pstmt.setInt(5, ReplyItem.getRelevel());
-			pstmt.setInt(7, ReplyItem.getViewcnt());
+			pstmt.setString(2, replyItem.getDate());
+			pstmt.setString(3, replyItem.getContent());
+			pstmt.setInt(4, replyItem.getRootid());
+			pstmt.setInt(5, replyItem.getRelevel());
+			pstmt.setInt(7, replyItem.getViewcnt());
 
 			// 유동적 조절
-			pstmt.setInt(6, ReplyItem.getRecnt());
+			pstmt.setInt(6, replyItem.getRecnt());
 
 			result = pstmt.executeUpdate();
 
@@ -286,6 +287,27 @@ public class ReplyItemDaoImpl implements ReplyItemDao {
 		return result;
 	}
 
+	@Override
+	public ArrayList<Integer[]> findRecnt(int rootid, int MomRecnt) {
+		ArrayList<Integer[]> rootidPack = new ArrayList<Integer[]>();
+		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:33063/koposw44", "root", "koposw44");
+				Statement stmt = conn.createStatement();
+				ResultSet rset = stmt.executeQuery("SELECT relevel, recnt FROM " + TABLE_NAME + " WHERE rootid = "
+						+ rootid + " AND " + COLUMN_RECNT + " >= " + MomRecnt + " ORDER BY recnt");) {
+
+			while (rset.next()) {
+				int relevel = rset.getInt(1);
+				int recnt = rset.getInt(2);
+				rootidPack.add(new Integer[] { relevel, recnt });
+			}
+		} catch (SQLException e) {
+			throw new IllegalStateException("count 실패 " + e.getMessage());
+		}
+
+		return rootidPack;
+	}
+
+	// 서비스 단으로 가야함. 수정 필요
 	private String addReplyMark(int relevel) {
 		String addMark = "";
 		for (int i = 0; i < relevel; i++) {
@@ -310,18 +332,35 @@ public class ReplyItemDaoImpl implements ReplyItemDao {
 		return lastRecnt;
 	}
 
-	@Override
+	@Override						//			2			2
 	public void pushBackRecnt(int rootid, int relevel, int recnt) {
 		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:33063/koposw44", "root", "koposw44");
 				Statement stmt = conn.createStatement();) {
 			stmt.executeUpdate("UPDATE " + TABLE_NAME + " set " + COLUMN_RECNT + " = " + COLUMN_RECNT + " + 1 where "
-					+ COLUMN_ROOTID + " = " + rootid + " AND " + COLUMN_RELEVEL + " = " + relevel + " AND "
-					+ COLUMN_RECNT + " >= " + recnt + " ORDER BY " + COLUMN_RECNT + " DESC");
-			stmt.executeUpdate("UPDATE " + TABLE_NAME + " set rootid = rootid + 1 where " + COLUMN_RECNT + " >= "
-					+ (recnt) + " ORDER BY " + COLUMN_ID + " DESC");
+					+ COLUMN_ROOTID + " = " + rootid + " AND " + COLUMN_RECNT + " >= " + recnt + " ORDER BY "
+					+ COLUMN_RECNT + " DESC");
+//			stmt.executeUpdate("UPDATE " + TABLE_NAME + " set " + COLUMN_RECNT + " = " + COLUMN_RECNT + " + 1 where "
+//					+ COLUMN_RECNT + " >= " + (recnt) + " ORDER BY " + COLUMN_ID + " DESC");
 		} catch (SQLException e) {
 			throw new IllegalStateException("id뒤로 밀기 실패 " + e.getMessage());
 		}
+	}
+
+	@Override
+	public int deleteLowerLevels(int rootid, int start, int end) {
+		String sql = "delete from " + TABLE_NAME + " where rootid = " + rootid + " AND " + COLUMN_RECNT + ">" + start
+				+ " AND " + COLUMN_RECNT + "<" + end;
+		int result = 0;
+
+		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:33063/koposw44", "root", "koposw44");
+				PreparedStatement pstmt = conn.prepareStatement(sql);) {
+			result = pstmt.executeUpdate();
+
+		} catch (Exception e) {
+			throw new IllegalStateException("db 연결 실패" + e.getMessage());
+		}
+
+		return result;
 	}
 
 }

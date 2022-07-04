@@ -21,7 +21,7 @@ public interface ReplyItemService {
 	ReplyItem replyItemUpdateOne(String title, String content, String strId);
 	
 	// 삭제
-	boolean replyItemDeleteOne(String strId);
+	boolean replyItemDeleteOne(String strId, int rootid, int relevel, int recnt);
 	
 	boolean replyItemDeleteAll();
 	
@@ -46,6 +46,5 @@ public interface ReplyItemService {
 	//댓글 추가하기
 	boolean createReply(String title, String content, String id, String relevel, String reRecnt);
 	
-	//댓글의 댓글...추가하기
-	boolean createRereply(String title, String content, String id, String relevel);
+	
 }

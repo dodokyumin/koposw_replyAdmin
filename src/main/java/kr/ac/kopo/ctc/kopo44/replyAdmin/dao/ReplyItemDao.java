@@ -1,5 +1,6 @@
 package kr.ac.kopo.ctc.kopo44.replyAdmin.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import kr.ac.kopo.ctc.kopo44.replyAdmin.domain.ReplyItem;
@@ -44,4 +45,10 @@ public interface ReplyItemDao {
 
 	//대댓댓글 생성시 뒤 recnt 한칸씩 밀기
 	void pushBackRecnt(int rootid, int relevel, int recnt);
+	
+	//서비스에서 현재 작성글의 recnt를 얻기 위해 사용되는 DB에 접근하는 메소드
+	ArrayList<Integer[]> findRecnt(int rootid, int MomRecnt);
+	
+	//서비스에서 현재 작성글의 밑 글들을 같이 삭제하게 만드는 메소드
+	int deleteLowerLevels(int rootid, int start, int end);
 }

@@ -29,7 +29,6 @@
 	pageContext.setAttribute("newDate", newDate);
 	pageContext.setAttribute("rootid", rootid);
 	pageContext.setAttribute("relevel", relevel);
-	pageContext.setAttribute("recnt", recnt);
 	%>
 	<form action="createReplyDone.jsp" method="post">
 		<table cellspacing=1 width=600 border=1>
@@ -56,16 +55,16 @@
 				<td width=100px>원글</td>
 				<td><input type="text" name="rootid" value="${rootid}" readonly></td>
 			</tr>
-			<!-- <tr>
-				<td width=100px>댓글 수준</td>
-				<td><input type="text" name="strReLevel" value="${relevel} +1"
+			<tr>
+				<td width=100px>댓글수준</td>
+				<td><input type="text" name="strReLevel" value="${relevel}"
 					readonly></td>
 			</tr>
 			<tr>
-				<td width=100px>댓글 순번</td>
+				<td width=100px>댓글 내 순서</td>
 				<td><input type="text" name="strRecnt"
-					value="${recnt}+1" readonly></td>
-			</tr> -->
+					value="${replyItem.recnt}" readonly></td>
+			</tr>
 		</table>
 		<table cellspacing=1 width=400 border=0>
 			<tr>

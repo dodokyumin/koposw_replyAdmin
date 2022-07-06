@@ -56,12 +56,12 @@
 				<td><input type="text" name="rootid" value="${rootid}" readonly></td>
 			</tr>
 			<tr>
-				<td width=100px>댓글수준</td>
+				<td width=100px>부모 댓글 수준</td>
 				<td><input type="text" name="strReLevel" value="${relevel}"
 					readonly></td>
 			</tr>
 			<tr>
-				<td width=100px>댓글 내 순서</td>
+				<td width=100px>부모 댓글의 순서</td>
 				<td><input type="text" name="strRecnt"
 					value="${replyItem.recnt}" readonly></td>
 			</tr>

@@ -45,7 +45,6 @@
 		</table>
 		<table cellspacing=1 width=400 border=0>
 			<tr>
-				<td width="200"></td>
 				<td width="100"><p align="center">
 						<input type="submit" value="등록">
 					</p></td>

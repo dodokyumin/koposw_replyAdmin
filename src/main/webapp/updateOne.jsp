@@ -75,7 +75,6 @@
 			</table>
 		</c:if>
 	</form>
-	<p align="center">
 		<input type="submit" value="삭제"
 			onclick="location.href='deleteOne.jsp?id=${replyItem.id}'">
 </body>

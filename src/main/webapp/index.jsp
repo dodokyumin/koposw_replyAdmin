@@ -14,7 +14,7 @@
 <meta charset="EUC-KR">
 <title>게시판</title>
 </head>
-<body>
+<body> 
 	<h1>게시판</h1>
 	<table cellspacing=1 width=700 border=1>
 		<tr style="background-color: grey;">

@@ -172,7 +172,7 @@ public class ReplyItemDaoImpl implements ReplyItemDao {
 
 	@Override
 	public int deleteOne(int id) {
-		String sql = "delete from " + TABLE_NAME + " where id=?";
+		String sql = "delete from " + TABLE_NAME + " WHERE id=?";
 		int result = 0;
 
 		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:33063/koposw44", "root", "koposw44");

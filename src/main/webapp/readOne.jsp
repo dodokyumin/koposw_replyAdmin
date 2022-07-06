@@ -45,7 +45,8 @@
 		</tr>
 		<tr>
 			<td width=100px>내용</td>
-			<td>${replyItem.content}</td>
+<td><textarea style="width: 500px; height: 300px;"
+						name="newContent" pattern='^[가-힣a-zA-Z]+$' required readonly>${replyItem.content}</textarea></td>
 		</tr>
 		<tr>
 			<td width=100px>원글</td>
